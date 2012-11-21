@@ -48,10 +48,69 @@ class syntax_plugin_tablewidth extends DokuWiki_Syntax_Plugin {
     }
 
     function render($mode, &$renderer, $data) {
-        if ($mode == 'xhtml') {
+        if ($mode === 'xhtml') {
             $renderer->doc .= '<!-- table-width ' . $data[0] . ' -->' . DOKU_LF;
             return true;
         }
+        if ($mode === 'odt') {
+            static $tableCounter = 0;
+
+            $line = preg_split('/\s+/', $data[0]);
+            array_shift($line);
+
+            $widths = preg_split('/\s+/', $data[0]);
+            $tableWidth = array_shift($widths);
+
+            $tableName = "plugintablewidth_$tableCounter";
+            if ($tableWidth !== '-') {
+                $renderer->autostyles[$tableName] = '
+                        <style:style style:name="'.$tableName.'" style:family="table">
+                            <style:table-properties style:width="'.$this->cssToOdtUnit($tableWidth).'" fo:margin-left="0cm" table:align="left" />
+                        </style:style>';
+            }
+            $i = 0;
+            foreach ($widths as $width) {
+                if ($width !== '-') {
+                    $renderer->autostyles["{$tableName}_$i"] = '
+                            <style:style style:name="'."{$tableName}_$i".'" style:family="table-column">
+                                <style:table-column-properties style:column-width="'.$this->cssToOdtUnit($width).'" />
+                            </style:style>';
+                }
+                $i++;
+            }
+
+            $renderer->doc .= "<!-- table-width $tableCounter ".implode(' ', $line)." -->" . DOKU_LF;
+
+            $tableCounter++;
+            return true;
+        }
+
         return false;
     }
+
+    function escape($str) {
+        return htmlspecialchars($str);
+    }
+
+    function cssToOdtUnit($input) {
+        $input = strtolower($input);
+
+        if (substr($input, -2) === 'pt') {
+            return $this->ptToMM(intval(substr($input, 0, -2))) . 'mm';
+        }
+        if (substr($input, -2) === 'px') {
+            return $this->ptToMM(intval(substr($input, 0, -2))) . 'mm';
+        }
+
+        return $this->escape($input);
+    }
+
+    function ptToMM($input) {
+        return round($input * 0.353);
+    }
+
+    function pxToMM($input) {
+        return round($input/72*25.4);
+    }
+
 }
