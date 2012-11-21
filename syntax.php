@@ -65,7 +65,7 @@ class syntax_plugin_tablewidth extends DokuWiki_Syntax_Plugin {
             if ($tableWidth !== '-') {
                 $renderer->autostyles[$tableName] = '
                         <style:style style:name="'.$tableName.'" style:family="table">
-                            <style:table-properties style:width="'.$this->cssToOdtUnit($tableWidth).'" fo:margin-left="0cm" table:align="left" />
+                            <style:table-properties '.$this->cssToOdtUnit($tableWidth, true).' fo:margin-left="0cm" table:align="left" />
                         </style:style>';
             }
             $i = 0;
@@ -73,7 +73,7 @@ class syntax_plugin_tablewidth extends DokuWiki_Syntax_Plugin {
                 if ($width !== '-') {
                     $renderer->autostyles["{$tableName}_$i"] = '
                             <style:style style:name="'."{$tableName}_$i".'" style:family="table-column">
-                                <style:table-column-properties style:column-width="'.$this->cssToOdtUnit($width).'" />
+                                <style:table-column-properties '.$this->cssToOdtUnit($width).' />
                             </style:style>';
                 }
                 $i++;
@@ -92,14 +92,19 @@ class syntax_plugin_tablewidth extends DokuWiki_Syntax_Plugin {
         return htmlspecialchars($str);
     }
 
-    function cssToOdtUnit($input) {
+    function cssToOdtUnit($input, $table = false) {
         $input = strtolower($input);
+        $pre = $table ? '' : 'column-';
+
 
         if (substr($input, -2) === 'pt') {
-            return $this->ptToMM(intval(substr($input, 0, -2))) . 'mm';
+            return "style:{$pre}width=\"" . $this->ptToMM(intval(substr($input, 0, -2))) . 'mm"';
         }
         if (substr($input, -2) === 'px') {
-            return $this->ptToMM(intval(substr($input, 0, -2))) . 'mm';
+            return "style:{$pre}width=\"" . $this->ptToMM(intval(substr($input, 0, -2))) . 'mm"';
+        }
+        if (substr($input, -1) === '%') {
+            return "style:rel-{$pre}width=\"" . $this->escape($input) . '"';
         }
 
         return $this->escape($input);
