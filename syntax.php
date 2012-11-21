@@ -62,18 +62,23 @@ class syntax_plugin_tablewidth extends DokuWiki_Syntax_Plugin {
             $tableWidth = array_shift($widths);
 
             $tableName = "plugintablewidth_$tableCounter";
-            if ($tableWidth !== '-') {
+            $attr = $this->cssToOdtUnit($tableWidth, true);
+            if ($tableWidth !== '-' && $attr !== '') {
                 $renderer->autostyles[$tableName] = '
                         <style:style style:name="'.$tableName.'" style:family="table">
-                            <style:table-properties '.$this->cssToOdtUnit($tableWidth, true).' fo:margin-left="0cm" table:align="left" />
+                            <style:table-properties '.$attr.' fo:margin-left="0cm" table:align="left" />
                         </style:style>';
             }
             $i = 0;
             foreach ($widths as $width) {
                 if ($width !== '-') {
+                    $attr = $this->cssToOdtUnit($width);
+                    if ($attr === '') {
+                        continue;
+                    }
                     $renderer->autostyles["{$tableName}_$i"] = '
                             <style:style style:name="'."{$tableName}_$i".'" style:family="table-column">
-                                <style:table-column-properties '.$this->cssToOdtUnit($width).' />
+                                <style:table-column-properties '.$attr.' />
                             </style:style>';
                 }
                 $i++;
@@ -107,7 +112,7 @@ class syntax_plugin_tablewidth extends DokuWiki_Syntax_Plugin {
             return "style:rel-{$pre}width=\"" . $this->escape($input) . '"';
         }
 
-        return $this->escape($input);
+        return '';
     }
 
     function ptToMM($input) {
