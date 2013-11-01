@@ -1,6 +1,8 @@
 <?php
-
-class RenderODTColumns extends DokuWikiTest {
+/**
+ * @group plugin_tablewidth
+ */
+class plugin_tablewidth_RenderODTColumns_test extends DokuWikiTest {
 
     function testColumns() {
         $plugin = new action_plugin_tablewidth();

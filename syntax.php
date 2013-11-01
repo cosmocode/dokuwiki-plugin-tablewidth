@@ -48,7 +48,7 @@ class syntax_plugin_tablewidth extends DokuWiki_Syntax_Plugin {
     }
 
     function render($mode, &$renderer, $data) {
-        if ($mode === 'xhtml') {
+        if ($mode === 'xhtml' || $mode === 'xml') {
             $renderer->doc .= '<!-- table-width ' . $data[0] . ' -->' . DOKU_LF;
             return true;
         }

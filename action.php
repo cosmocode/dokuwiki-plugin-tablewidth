@@ -27,7 +27,7 @@ class action_plugin_tablewidth extends DokuWiki_Action_Plugin {
      * Replace table-width comments by HTML
      */
     function replaceComments(Doku_Event &$event, $param) {
-        if ($event->data[0] !== 'xhtml') {
+        if ($event->data[0] !== 'xhtml' && $event->data[0] !== 'xml') {
             return;
         }
         $pattern = '/(<!-- table-width [^\n]+? -->\n)([^\n]*<table.*?>)(\s*<t)/';
